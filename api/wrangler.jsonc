@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "ilyaphm-classroom-ai",
+  "main": "src/worker.ts",
+  // Pinned to the date supported by the bundled workerd test runtime.
+  "compatibility_date": "2026-10-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "secrets": { "required": ["DEEPSEEK_API_KEY", "STUDENT_CODES_JSON"] },
+  "vars": {
+    "API_ENABLED": "true",
+    "MODEL": "deepseek-flash",
+    "ALLOWED_ORIGINS": "https://ilyaphm.github.io",
+    "ALLOW_FILE_ORIGIN": "true",
+    "CLASSROOM_ID": "workshop-2026",
+    "DAILY_CLASS_LIMIT": "200",
+    "DAILY_STUDENT_LIMIT": "30",
+    "MINUTE_STUDENT_LIMIT": "5",
+    "MAX_OUTPUT_TOKENS": "800"
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "QUOTAS", "class_name": "ClassroomQuota" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ClassroomQuota"] }],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": { "enabled": true, "invocation_logs": false }
+  }
+}
