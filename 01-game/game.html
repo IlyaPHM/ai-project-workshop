@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DTA — Добрый город</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#eef6f1;background:#101e22;color-scheme:dark}*{box-sizing:border-box}body{margin:0;padding:24px}main{max-width:1040px;margin:auto}header{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:20px}.eyebrow{text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:#a4c7bb}h1{margin:6px 0 0;font-size:32px;letter-spacing:-1px}.subtitle{color:#afc4bd;font-size:14px;line-height:1.6;max-width:450px;margin:8px 0 0}.badge{background:#223638;color:#bce4cb;border:1px solid #395c52;border-radius:30px;padding:8px 13px;font-size:12px;white-space:nowrap}.hud{display:grid;grid-template-columns:1fr auto;gap:16px;background:#203537;border:1px solid #39524e;border-radius:16px;padding:18px 22px;margin-bottom:14px}.hud p{margin:0}.label{font-size:11px;letter-spacing:.12em;color:#acc6b9;text-transform:uppercase}.task{font-size:18px;font-weight:650;margin-top:6px!important}.money{font-size:24px;font-weight:750;align-self:center;color:#f7d98a}.stage{color:#afc4bd;font-size:13px;margin-top:7px!important}.board{position:relative;border:1px solid #48615a;border-radius:20px;overflow:hidden;background:#345451;box-shadow:0 22px 60px #0003}canvas{width:100%;height:auto;display:block;outline:none;touch-action:none}canvas:focus-visible{outline:3px solid #ffdd8a;outline-offset:-4px}.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#102329da;padding:18px}.overlay[hidden]{display:none}.panel{max-width:470px;text-align:center;padding:26px;background:#183035;border:1px solid #49665d;border-radius:20px}.panel h2{font-size:32px;letter-spacing:-1px;margin:10px 0}.panel p{font-size:15px;line-height:1.6;color:#c1d1c7;margin:10px 0}.panel .tiny{font-size:12px;color:#adc3b7}.avatars{display:flex;justify-content:center;gap:10px;margin:18px 0}button{font:inherit;border:1px solid #4b6860;border-radius:10px;padding:11px 16px;cursor:pointer;color:#e5eee7;background:#2c4646;min-height:44px}button:hover{background:#3c5d58}button:focus-visible,a:focus-visible{outline:3px solid #fbdc91;outline-offset:3px}button[aria-pressed=true]{border:2px solid #f1cf78;background:#395449}.primary{background:#f6d583;color:#1e302c;font-weight:750;border-color:#f6d583}.primary:hover{background:#ffe2a0}.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:15px 0}.actions{display:flex;gap:8px}.hint{font-size:12px;line-height:1.6;color:#b4cac0;max-width:530px}.touch{display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(2,44px);gap:5px;flex:none}.touch button{padding:0;font-size:20px;touch-action:none;user-select:none}.up{grid-column:2}.left{grid-column:1;grid-row:2}.down{grid-column:2;grid-row:2}.right{grid-column:3;grid-row:2}.bottom{display:flex;justify-content:space-between;align-items:center;gap:16px;color:#9bb8aa;font-size:12px;line-height:1.6;margin-top:15px}a{color:#d9e9c5}kbd{border:1px solid #4b665c;border-radius:4px;padding:1px 4px;color:#dfebde}footer{margin-top:18px;color:#9ab5aa;font-size:12px}@media(max-width:650px){body{padding:12px}header{align-items:flex-start}.badge{display:none}h1{font-size:27px}.hud{padding:14px;gap:8px}.task{font-size:14px}.money{font-size:18px}.toolbar{flex-wrap:wrap}.hint{order:3;max-width:none}.panel{padding:16px;max-width:350px}.panel h2{font-size:23px}.panel p{font-size:12px;line-height:1.45}.avatars{margin:10px 0}.avatars button{padding:7px 10px}.bottom{align-items:flex-start}.subtitle{font-size:12px}.stage{font-size:11px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+<style>@media(max-width:650px){.overlay{position:relative;inset:auto;padding:12px}.board:has(.overlay:not([hidden])) canvas{display:none}.panel{max-width:none;width:100%}}</style>
+</head>
+<body>
+<main>
+<header><div><div class="eyebrow">Учебная игра · версия 1</div><h1>DTA <span style="font-weight:400;color:#a7c5b4">/ Добрый город</span></h1><p class="subtitle">Город, который становится ближе с каждым добрым делом. Садись за руль и доставь три заказа.</p></div><span class="badge">Работает без интернета</span></header>
+<section class="hud" aria-label="Состояние игры"><div><p class="label" id="progress">Задание 1 из 3</p><p class="task" id="task">Забери заказ у кофейни · точка A</p><p class="stage" id="stage">Выбери героя и начни игру</p></div><p class="money" id="money">0 монет</p></section>
+<div class="board"><canvas id="city" width="960" height="600" tabindex="0" aria-label="Карта города. Управление стрелками, WASD или экранными кнопками. Светлая точка A — получить заказ, B — доставить."></canvas>
+<div class="overlay" id="overlay"><section class="panel"><div class="eyebrow" id="panelTag">Одна смена курьера</div><h2 id="panelTitle">Три заказа. Твой город.</h2><p id="panelText">Подъедь к точке A, забери заказ и отвези к B. За каждую доставку — 100 монет. Здания объезжай по улицам.</p><div class="avatars" id="avatars"><button data-hero="0" aria-pressed="true"><span class="dot" style="background:#f4c86e"></span>Саша</button><button data-hero="1" aria-pressed="false"><span class="dot" style="background:#a9bafa"></span>Женя</button></div><button class="primary" id="start">Начать</button><p class="tiny">Стрелки / WASD · кнопки на экране · P — пауза</p></section></div></div>
+<div class="toolbar"><div class="actions"><button id="pause">Пауза</button><button id="restart">Заново</button></div><div class="hint"><kbd>A</kbd> Получи заказ → <kbd>B</kbd> Доставь. Подъедь достаточно близко — действие выполнится автоматически. Зажимай две стрелки для диагонали.</div><div class="touch" aria-label="Управление машиной"><button class="up" data-key="ArrowUp" aria-label="Ехать вверх">↑</button><button class="left" data-key="ArrowLeft" aria-label="Ехать влево">←</button><button class="down" data-key="ArrowDown" aria-label="Ехать вниз">↓</button><button class="right" data-key="ArrowRight" aria-label="Ехать вправо">→</button></div></div>
+<div class="bottom"><span id="status" role="status" aria-live="polite">Добро пожаловать! Выбери героя.</span><a href="../index.html">К проектам</a></div><footer>Это основа для твоего проекта. Измени название, героев или задания вместе с ИИ и сохрани свою версию.</footer>
+</main>
+<script>
+"use strict";
+(() => {
+  const canvas = document.getElementById('city');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height, R = 13, SPEED = 175;
+  const ui = Object.fromEntries(['progress','task','stage','money','overlay','panelTag','panelTitle','panelText','avatars','start','pause','restart','status'].map(id=>[id,document.getElementById(id)]));
+  const buildings = [
+    {x:34,y:28,w:230,h:105,name:'КОФЕЙНЯ',color:'#d9ad77'},
+    {x:385,y:28,w:190,h:105,name:'МАСТЕРСКАЯ',color:'#acbfa9'},
+    {x:700,y:28,w:225,h:105,name:'ШКОЛА',color:'#b2bacd'},
+    {x:35,y:265,w:230,h:76,name:'ПЕКАРНЯ',color:'#cfad9c'},
+    {x:385,y:265,w:190,h:76,name:'ПАРК',color:'#83ac8e'},
+    {x:700,y:265,w:225,h:76,name:'БИБЛИОТЕКА',color:'#b4b4d0'},
+    {x:35,y:478,w:230,h:92,name:'ПРИЮТ',color:'#a3c1b2'},
+    {x:385,y:478,w:190,h:92,name:'ДОМ КУЛЬТУРЫ',color:'#d0b790'},
+    {x:700,y:478,w:225,h:92,name:'МАГАЗИН',color:'#a1b9bf'}
+  ];
+  const jobs = [
+    {item:'напитки',from:'кофейни',to:'школе',pick:{x:150,y:185},drop:{x:810,y:185}},
+    {item:'книги',from:'библиотеки',to:'дому культуры',pick:{x:810,y:400},drop:{x:480,y:420}},
+    {item:'корм',from:'магазина',to:'приюту',pick:{x:810,y:440},drop:{x:150,y:420}}
+  ];
+  const heroes = [{name:'Саша',color:'#f4c86e'},{name:'Женя',color:'#a9bafa'}];
+  const keys = new Set();
+  let hero = 0, mode = 'ready', x = 320, y = 520, angle = -Math.PI/2;
+  let job = 0, carrying = false, coins = 0, last = 0;
+
+  function clearKeys(){ keys.clear(); }
+  function updateHud(){
+    ui.money.textContent = coins + ' монет';
+    if(job >= jobs.length){
+      ui.progress.textContent='Смена завершена';ui.task.textContent='Все три заказа доставлены!';
+      ui.stage.textContent=heroes[hero].name + ' помогает городу';return;
+    }
+    const j=jobs[job];ui.progress.textContent=`Задание ${job+1} из ${jobs.length}`;
+    ui.task.textContent=carrying ? `Отвези ${j.item} к ${j.to} · точка B` : `Забери ${j.item} у ${j.from} · точка A`;
+    ui.stage.textContent=carrying ? 'Заказ в машине. Следуй к точке B' : 'Подъедь к светлой точке A';
+  }
+  function announce(text){ui.status.textContent=text;}
+  function showPanel(tag,title,text,button,showHeroes=false){
+    ui.panelTag.textContent=tag;ui.panelTitle.textContent=title;ui.panelText.textContent=text;
+    ui.start.textContent=button;ui.avatars.hidden=!showHeroes;
+    ui.avatars.style.display=showHeroes?'flex':'none';ui.overlay.hidden=false;
+  }
+  function pause(){
+    if(mode!=='playing')return;
+    mode='paused';clearKeys();ui.pause.textContent='Продолжить';
+    showPanel('Можно передохнуть','Город подождёт','Твой прогресс сохранён до перезапуска или закрытия страницы.','Продолжить');
+    announce('Игра на паузе.');
+  }
+  function play(){mode='playing';clearKeys();last=0;ui.overlay.hidden=true;ui.pause.textContent='Пауза';canvas.focus();announce('Поехали! ' + ui.task.textContent);}
+  function reset(){
+    x=320;y=520;angle=-Math.PI/2;job=0;carrying=false;coins=0;mode='ready';last=0;clearKeys();
+    ui.pause.textContent='Пауза';updateHud();
+    showPanel('Одна смена курьера','Три заказа. Твой город.','Подъедь к точке A, забери заказ и отвези к B. За каждую доставку — 100 монет. Здания объезжай по улицам.','Начать',true);
+    announce('Новая смена. Выбери героя и нажми «Начать».');
+  }
+  function canMove(nx,ny){
+    if(nx<R||nx>W-R||ny<R||ny>H-R)return false;
+    return !buildings.some(b=>nx+R>b.x&&nx-R<b.x+b.w&&ny+R>b.y&&ny-R<b.y+b.h);
+  }
+  function complete(){
+    mode='won';clearKeys();updateHud();
+    showPanel('Город говорит спасибо','Отличная смена!','Три заказа доставлены. Ты заработал 300 монет. Теперь придумай своё изменение игры.','Играть ещё');
+    announce('Победа! Три доставки и 300 монет.');
+  }
+  function update(dt){
+    if(mode!=='playing')return;
+    let dx=Number(keys.has('ArrowRight')||keys.has('KeyD'))-Number(keys.has('ArrowLeft')||keys.has('KeyA'));
+    let dy=Number(keys.has('ArrowDown')||keys.has('KeyS'))-Number(keys.has('ArrowUp')||keys.has('KeyW'));
+    if(dx||dy){
+      const length=Math.hypot(dx,dy);dx/=length;dy/=length;angle=Math.atan2(dy,dx);
+      const nx=x+dx*SPEED*dt,ny=y+dy*SPEED*dt;
+      if(canMove(nx,y))x=nx;if(canMove(x,ny))y=ny;
+    }
+    const j=jobs[job];
+    if(!j)return;
+    const target=carrying?j.drop:j.pick;
+    if(Math.hypot(x-target.x,y-target.y)<29){
+      if(!carrying){carrying=true;updateHud();announce('Заказ получен! '+ui.task.textContent);}
+      else{coins+=100;job++;carrying=false;updateHud();if(job===jobs.length)complete();else announce('Доставка выполнена! +100 монет. '+ui.task.textContent);}
+    }
+  }
+  function rounded(px,py,w,h,r,fill){ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(px,py,w,h,r);ctx.fill();}
+  function marker(point,label,active){
+    const color=active?'#ffe19a':'#a7d1c1';
+    ctx.fillStyle=active?'#ffe19a22':'#c8ecdb10';ctx.beginPath();ctx.arc(point.x,point.y,33,0,Math.PI*2);ctx.fill();
+    ctx.lineWidth=active?3:1;ctx.strokeStyle=color;ctx.beginPath();ctx.arc(point.x,point.y,24,0,Math.PI*2);ctx.stroke();
+    rounded(point.x-13,point.y-13,26,26,8,color);ctx.fillStyle='#213f3a';ctx.textAlign='center';ctx.font='bold 16px system-ui';ctx.fillText(label,point.x,point.y+6);
+  }
+  function draw(){
+    ctx.fillStyle='#446a5b';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#25454a';ctx.fillRect(0,150,W,85);ctx.fillRect(0,360,W,90);ctx.fillRect(280,0,80,H);ctx.fillRect(605,0,70,H);
+    ctx.strokeStyle='#709286';ctx.lineWidth=2;ctx.setLineDash([12,16]);
+    for(const yy of [192,405]){ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(W,yy);ctx.stroke();}
+    for(const xx of [320,640]){ctx.beginPath();ctx.moveTo(xx,0);ctx.lineTo(xx,H);ctx.stroke();}ctx.setLineDash([]);
+    for(const b of buildings){
+      rounded(b.x+5,b.y+7,b.w,b.h,12,'#203d3c77');rounded(b.x,b.y,b.w,b.h,12,b.color);
+      rounded(b.x+9,b.y+9,b.w-18,b.h-18,7,'#ffffff10');
+      ctx.fillStyle='#2e4944';ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.fillText(b.name,b.x+b.w/2,b.y+b.h/2+5);
+      for(let i=0;i<3;i++)rounded(b.x+22+i*(b.w-44)/3,b.y+b.h-19,16,5,2,'#38564d55');
+    }
+    for(const t of [{x:32,y:210},{x:930,y:215},{x:30,y:420},{x:932,y:395},{x:370,y:560},{x:590,y:50}]){
+      ctx.fillStyle='#244d3f';ctx.beginPath();ctx.arc(t.x+3,t.y+3,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#6f9b72';ctx.beginPath();ctx.arc(t.x,t.y,10,0,Math.PI*2);ctx.fill();
+    }
+    if(job<jobs.length){marker(jobs[job].pick,'A',!carrying);marker(jobs[job].drop,'B',carrying);}
+    ctx.save();ctx.translate(x,y);ctx.rotate(angle);rounded(-16,-10,32,20,5,'#102e2d');rounded(-17,-12,32,20,5,heroes[hero].color);
+    rounded(0,-9,8,14,2,'#234448');rounded(-11,-9,6,14,2,'#234448');
+    ctx.fillStyle='#fff1ba';ctx.fillRect(11,-9,3,4);ctx.fillRect(11,1,3,4);ctx.restore();
+    if(carrying){rounded(x-7,y-30,14,12,3,'#f5e5b2');ctx.fillStyle='#906f45';ctx.fillRect(x-1,y-29,2,10);}
+  }
+  const movement=new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD']);
+  window.addEventListener('keydown',event=>{
+    if(event.code==='KeyP'&&!event.repeat){event.preventDefault();if(mode==='playing')pause();else if(mode==='paused')play();return;}
+    if(movement.has(event.code)&&mode==='playing'){event.preventDefault();keys.add(event.code);}
+  });
+  window.addEventListener('keyup',event=>keys.delete(event.code));
+  window.addEventListener('blur',pause);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
+  document.querySelectorAll('[data-key]').forEach(button=>{
+    const code=button.dataset.key;
+    button.addEventListener('pointerdown',e=>{if(mode!=='playing')return;e.preventDefault();button.setPointerCapture(e.pointerId);keys.add(code);});
+    for(const name of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(name,()=>keys.delete(code));
+  });
+  document.querySelectorAll('[data-hero]').forEach(button=>button.addEventListener('click',()=>{
+    if(mode!=='ready')return;hero=Number(button.dataset.hero);
+    document.querySelectorAll('[data-hero]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+  }));
+  ui.start.addEventListener('click',()=>{if(mode==='won'){reset();play();}else play();});
+  ui.pause.addEventListener('click',()=>{if(mode==='playing')pause();else if(mode==='paused')play();});
+  ui.restart.addEventListener('click',reset);
+  function frame(time){
+    const dt=last?Math.min((time-last)/1000,0.04):0;last=time;update(dt);draw();requestAnimationFrame(frame);
+  }
+  updateHud();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
